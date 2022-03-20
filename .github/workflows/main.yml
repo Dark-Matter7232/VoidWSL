@@ -15,11 +15,18 @@ jobs:
         run: sudo apt install make curl zip unzip check -qq
       - name: Build
         run: make
-      - name: Upload artifacts
-        if: ${{ startsWith(github.ref, 'refs/tags/') }}
-        run: |
-          artifacts="-a ./Void.zip"
-          tag_name="${GITHUB_REF#refs/tags/}"
-          hub release create $artifacts -m "$tag_name" "$tag_name"
+      - name: Get current date
+        id: date
+        run: echo "time=$(date +'%Y-%m-%d')" >> $GITHUB_ENV
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: ${{ env.time }}
+          name: nightly-release-${{ env.time }}
+          body: |
+            Void.zip built on ${{ env.time }}
+          files: |
+            Void.zip
+                                      
